@@ -17,7 +17,7 @@ make
 ```
 
 ## Sample output
-Ran with 4 process, 2 nodes, 2 process and 2 GPU for each node.
+Ran with 4 tasks, 2 nodes, 2 tasks and 2 GPUs for each node.
 
 ### 1. [submit_srun_getenv.sh](submit_srun_getenv.sh) (OMPI_COMM_WORLD_LOCAL_RANK is not defined)
 ```
