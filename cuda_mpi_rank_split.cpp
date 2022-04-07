@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     int resultlength;
     MPI_Get_processor_name(name, &resultlength);
 
-	/* -------------------------------------------------------------------------------------------
+    /* -------------------------------------------------------------------------------------------
         Find local rank
     --------------------------------------------------------------------------------------------*/
     int local_rank = -1;
@@ -51,14 +51,14 @@ int main(int argc, char *argv[])
 
     // Map MPI ranks to GPUs according to node-local MPI rank (round-robin)
     int gpu_id = local_rank % num_devices;
-	int real_gpu_id = -1;
+    int real_gpu_id = -1;
 
-	if (gpu_id >= 0 && num_devices) {
-		// Set cuda device
-		cudaSetDevice(gpu_id);
-		// Check which GPU each MPI rank is actually mapped to
-		cudaGetDevice(&real_gpu_id);
-	}
+    if (gpu_id >= 0 && num_devices) {
+        // Set cuda device
+        cudaSetDevice(gpu_id);
+        // Check which GPU each MPI rank is actually mapped to
+        cudaGetDevice(&real_gpu_id);
+    }
 
     /* -------------------------------------------------------------------------------------------
         Output and finalize
