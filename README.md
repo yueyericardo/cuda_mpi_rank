@@ -1,23 +1,76 @@
-# Notes
+# cuda_mpi_rank
+Check local CUDA rank within OpenMPI.
+
+There are two ways to get local MPI rank within a node to assign a GPU device:
+1. getenv: Read an environment variable `OMPI_COMM_WORLD_LOCAL_RANK`
+    - This currently works for mpirun
+    - But not with srun
+2. split: Use `MPI_Comm_split_type`, reference: [FAQ: Running CUDA-aware Open MPI](https://www.open-mpi.org/faq/?category=runcuda#:~:text=11.%20When%20do%20I%20need%20to%20select%20a%20CUDA%20device%3F)
+    - Always works
+
+
+## Build
+Tested on Hipergator
 ```bash
-# request node
-srun --partition=hpg-ai --reservation=hackathon --account=nvidia-ai --qos=nvidia-ai --gpus=8 --ntasks-per-node=8 --nodes=1 --ntasks=8 --cpus-per-task=2 --mem=80gb -t 10:00:00 --pty /bin/bash -i
-# build
-module load gcc/9.3.0 openmpi/4.0.4 cuda/11.1.0
-mpicc -I/apps/compilers/cuda/11.1.0/include -L/apps/compilers/cuda/11.1.0/lib64 -lcudart local_mpi_to_gpu.cpp -o local_mpi_to_gpu
-# run
-module load gcc/9.3.0 openmpi/4.0.4 cuda/11.1.0
-mpirun -np 8 local_mpi_to_gpu
+module load cuda/11.4.3 gcc/9.3.0 openmpi/4.0.5 cmake
+make
 ```
 
-output
+## getenv srun
 ```
-Global Rank: 004 of 008, Local Rank: 004, HWThread 003, GPU: 4 Node: c1006a-s23.ufhpc
-Global Rank: 002 of 008, Local Rank: 002, HWThread 007, GPU: 2 Node: c1006a-s23.ufhpc
-Global Rank: 006 of 008, Local Rank: 006, HWThread 128, GPU: 6 Node: c1006a-s23.ufhpc
-Global Rank: 007 of 008, Local Rank: 007, HWThread 132, GPU: 7 Node: c1006a-s23.ufhpc
-Global Rank: 001 of 008, Local Rank: 001, HWThread 133, GPU: 1 Node: c1006a-s23.ufhpc
-Global Rank: 000 of 008, Local Rank: 000, HWThread 005, GPU: 0 Node: c1006a-s23.ufhpc
-Global Rank: 005 of 008, Local Rank: 005, HWThread 006, GPU: 5 Node: c1006a-s23.ufhpc
-Global Rank: 003 of 008, Local Rank: 003, HWThread 001, GPU: 3 Node: c1006a-s23.ufhpc
+Date              = Thu Apr  7 18:32:47 EDT 2022
+Hostname          = c1106a-s11
+Working Directory = /blue/roitberg/jinzexue/dev/cuda_mpi_rank
+
+Number of Nodes Allocated      = 2
+Number of Tasks Allocated      = 4
+Number of Cores/Task Allocated = 1
+GPU Driver '470' detected
+
+submit_srun_cuda_mpi_getenv.sh
+OMPI_COMM_WORLD_LOCAL_RANK is not defined
+OMPI_COMM_WORLD_LOCAL_RANK is not defined
+OMPI_COMM_WORLD_LOCAL_RANK is not defined
+OMPI_COMM_WORLD_LOCAL_RANK is not defined
+Global Rank: 002 of 004, Local Rank: -01, GPU: -1, Num GPUs: 2, Node: c1110a-s17.ufhpc
+Global Rank: 003 of 004, Local Rank: -01, GPU: -1, Num GPUs: 2, Node: c1110a-s17.ufhpc
+Global Rank: 000 of 004, Local Rank: -01, GPU: -1, Num GPUs: 2, Node: c1106a-s11.ufhpc
+Global Rank: 001 of 004, Local Rank: -01, GPU: -1, Num GPUs: 2, Node: c1106a-s11.ufhpc
+```
+
+## getenv mpirun
+```
+Date              = Thu Apr  7 18:46:01 EDT 2022
+Hostname          = c0909a-s11
+Working Directory = /blue/roitberg/jinzexue/dev/cuda_mpi_rank
+
+Number of Nodes Allocated      = 2
+Number of Tasks Allocated      = 4
+Number of Cores/Task Allocated = 1
+GPU Driver '470' detected
+
+submit_mpirun_cuda_mpi_getenv.sh
+Global Rank: 002 of 004, Local Rank: 000, GPU: 0, Num GPUs: 2, Node: c0909a-s35.ufhpc
+Global Rank: 003 of 004, Local Rank: 001, GPU: 1, Num GPUs: 2, Node: c0909a-s35.ufhpc
+Global Rank: 000 of 004, Local Rank: 000, GPU: 0, Num GPUs: 2, Node: c0909a-s11.ufhpc
+Global Rank: 001 of 004, Local Rank: 001, GPU: 1, Num GPUs: 2, Node: c0909a-s11.ufhpc
+```
+
+
+## split srun
+```
+Date              = Thu Apr  7 18:32:47 EDT 2022
+Hostname          = c0800a-s17
+Working Directory = /blue/roitberg/jinzexue/dev/cuda_mpi_rank
+
+Number of Nodes Allocated      = 2
+Number of Tasks Allocated      = 4
+Number of Cores/Task Allocated = 1
+GPU Driver '470' detected
+
+submit_srun_cuda_mpi_split.sh
+Global Rank: 002 of 004, Local Rank: 000, GPU: 0, Num GPUs: 2, Node: c0801a-s11.ufhpc
+Global Rank: 000 of 004, Local Rank: 000, GPU: 0, Num GPUs: 2, Node: c0800a-s17.ufhpc
+Global Rank: 001 of 004, Local Rank: 001, GPU: 1, Num GPUs: 2, Node: c0800a-s17.ufhpc
+Global Rank: 003 of 004, Local Rank: 001, GPU: 1, Num GPUs: 2, Node: c0801a-s11.ufhpc
 ```
