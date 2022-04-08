@@ -1,5 +1,5 @@
 # cuda_mpi_rank
-Check local CUDA rank within OpenMPI.
+Check local OpenMPI rank.
 
 There are two ways to get local MPI rank within a node to assign a GPU device:
 1. getenv: Read an environment variable `OMPI_COMM_WORLD_LOCAL_RANK`
